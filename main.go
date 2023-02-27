@@ -25,6 +25,12 @@ func main() {
 	}
 	defer db.Close()
 
+	//create a table if dosen't exist
+	_, err = db.Exec("CREATE TABLE IF NOT EXITS users (id SERIAL PRIMARY KEY, name TEXT, email TEXT)")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	//create router
 	router := mux.NewRouter()
 	router.HandleFunc("/users", getUsers(db)).Methods("GET")
@@ -34,7 +40,7 @@ func main() {
 	router.HandleFunc("/users/{id}", deleteUser(db)).Methods("DELETE")
 
 	//start server
-	log.Fatal(http.ListenAndServe(":8080", jsonContentTypeMiddleware(router)))
+	log.Fatal(http.ListenAndServe(":8000", jsonContentTypeMiddleware(router)))
 }
 
 func jsonContentTypeMiddleware(next http.Handler) http.Handler {
@@ -72,7 +78,6 @@ func getUsers(db *sql.DB) http.HandlerFunc {
 }
 
 //get user by Id
-
 func getUser(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
